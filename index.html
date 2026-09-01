@@ -42,6 +42,7 @@
   }
   .search-wrap{
     flex: 1;
+    min-width: 0;
     max-width: 420px;
     position: relative;
   }
@@ -71,6 +72,7 @@
     font-size: 13px;
     color: var(--ink-soft);
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   /* ===== Table ===== */
@@ -79,8 +81,13 @@
     margin: 0 auto;
     padding: 0 48px 80px;
   }
+  .table-scroll{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   table{
     width: 100%;
+    min-width: 560px;
     border-collapse: collapse;
     margin-top: 6px;
   }
@@ -92,10 +99,11 @@
     padding: 12px 16px;
     border-bottom: 1px solid var(--ink);
     position: sticky;
-    top: 65px;
+    top: var(--stick-top, 65px);
     background: var(--bg);
     cursor: pointer;
     user-select: none;
+    white-space: nowrap;
   }
   thead th:hover{ color: var(--teal-deep); }
   thead th .arrow{ font-size: 10px; margin-left: 4px; opacity: 0.5; }
@@ -123,6 +131,7 @@
   td.genes{
     color: var(--ink-soft);
     font-size: 13.5px;
+    white-space: nowrap;
   }
   .tag-chip{
     display: inline-block;
@@ -153,16 +162,18 @@
   }
 
   @media (max-width: 760px){
-    .toolbar{ padding: 16px 20px; flex-wrap: wrap; }
-    .table-wrap{ padding: 0 20px 60px; }
-    thead th{ top: 105px; }
-    td, thead th{ padding: 10px 8px; font-size: 12.5px; }
+    .toolbar{ padding: 14px 16px; gap: 10px; }
+    .search-wrap{ max-width: none; }
+    .search-wrap input{ font-size: 13px; padding: 9px 12px 9px 34px; }
+    .result-count{ font-size: 11px; }
+    .table-wrap{ padding: 0 0 60px; }
+    td, thead th{ padding: 9px 10px; font-size: 12.5px; }
   }
 </style>
 </head>
 <body>
 
-<div class="toolbar">
+<div class="toolbar" id="toolbar">
   <div class="search-wrap">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -173,17 +184,19 @@
 </div>
 
 <div class="table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th data-key="uniprot">UniProt ID <span class="arrow">↕</span></th>
-        <th data-key="entry">Entry name <span class="arrow">↕</span></th>
-        <th data-key="genes">Gene names</th>
-        <th data-key="tag">标签</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-key="uniprot">UniProt ID <span class="arrow">↕</span></th>
+          <th data-key="entry">Entry name <span class="arrow">↕</span></th>
+          <th data-key="genes">Gene names</th>
+          <th data-key="tag">标签</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
   <div class="empty-state" id="emptyState">未找到匹配的靶点，换个关键词试试。</div>
 </div>
 
@@ -246,6 +259,14 @@ document.querySelectorAll('thead th[data-key]').forEach(th => {
 });
 
 applyFilters();
+
+function updateStickyOffset(){
+  const toolbar = document.getElementById('toolbar');
+  document.documentElement.style.setProperty('--stick-top', toolbar.offsetHeight + 'px');
+}
+window.addEventListener('load', updateStickyOffset);
+window.addEventListener('resize', updateStickyOffset);
+updateStickyOffset();
 </script>
 
 </body>
